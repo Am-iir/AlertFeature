@@ -74,3 +74,12 @@ resource "aws_iam_role_policy_attachment" "lambda_ses_policy_attachment" {
   role       = aws_iam_role.lambda_read_send_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSESFullAccess"
 }
+
+# Add the SNS topic trigger to the Lambda function
+resource "aws_lambda_permission" "lambda_sns_trigger_permission" {
+  statement_id  = "AllowExecutionFromSNS"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.lambda_read_send.function_name
+  principal     = "sns.amazonaws.com"
+  source_arn    = aws_sns_topic.alarm_topic.arn
+}
