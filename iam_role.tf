@@ -25,19 +25,23 @@ resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-# Define a custom IAM policy for Cost Explorer access
+# Define a custom IAM policy for Cost Explorer and CloudWatch access
 resource "aws_iam_policy" "custom_policy" {
-  name        = "CustomCostExplorerPolicy"  # Name of the custom policy
-  description = "Custom policy for Cost Explorer access"
+  name        = "CustomCostExplorerCloudWatchPolicy"  # Name of the custom policy
+  description = "Custom policy for Cost Explorer and CloudWatch access"
 
-  # Define the policy document allowing ce:GetCostAndUsage action on all resources
+  # Define the policy document allowing ce:GetCostAndUsage, cloudwatch:PutMetricAlarm, and cloudwatch:PutMetricData actions
   policy = <<EOF
 {
   "Version": "2012-10-17",
   "Statement": [
     {
       "Effect": "Allow",
-      "Action": "ce:GetCostAndUsage",
+      "Action": [
+        "ce:GetCostAndUsage",
+        "cloudwatch:PutMetricAlarm",
+        "cloudwatch:PutMetricData"
+      ],
       "Resource": "*"
     }
   ]
@@ -46,7 +50,7 @@ EOF
 }
 
 # Attach the custom policy to the IAM role
-resource "aws_iam_role_policy_attachment" "cost_explorer_policy_attachment" {
+resource "aws_iam_role_policy_attachment" "cost_explorer_cloudwatch_policy_attachment" {
   role       = aws_iam_role.lambda_role.name
   policy_arn = aws_iam_policy.custom_policy.arn
 }

@@ -1,64 +1,58 @@
 import boto3
+import datetime
 import json
-from prometheus_client import CollectorRegistry, Gauge, push_to_gateway
+
+# Maximum budget set by the user (in dollars)
+maximum_budget = 1.0
 
 def handler(event, context):
-    # Create a Cost Explorer client in the EU (Ireland) region
-    cost_explorer = boto3.client('ce', region_name='eu-west-1')
+    # Create a Cost Explorer client
+    cost_explorer = boto3.client('ce')
 
-    # Retrieve the cost data using the appropriate Cost Explorer API method
+    # Get the current date and time
+    current_time = datetime.datetime.utcnow()
+
+    # Calculate the start and end dates for the current month
+    start_date = datetime.datetime(current_time.year, current_time.month, 1).strftime('%Y-%m-%d')
+    end_date = current_time.strftime('%Y-%m-%d')
+
+    # Retrieve the cost data for the specified time period
     response = cost_explorer.get_cost_and_usage(
         TimePeriod={
-            'Start': '2023-07-01',
-            'End': '2023-07-31'
+            'Start': start_date,
+            'End': end_date
         },
-        Granularity='DAILY',
+        Granularity='MONTHLY',
         Metrics=[
-            'BlendedCost',
+            'UnblendedCost'
         ]
     )
 
-    # Transform the cost data as needed
-    transformed_data = transform_data(response)
+    # Extract the total cost from the response
+    total_cost = float(response['ResultsByTime'][0]['Total']['UnblendedCost']['Amount'])
 
-    # Push the transformed data to the Push Gateway using HTTP or a suitable client library
-    push_to_gateway(transformed_data)
+    # Calculate the cost percentage based on the maximum budget
+    cost_percentage = (total_cost / maximum_budget) * 100
+
+    # Publish the cost percentage as a custom metric to CloudWatch Metrics
+    publish_to_cloudwatch(cost_percentage)
 
     return {
         'statusCode': 200,
-        'body': json.dumps('Cost data retrieved and pushed to Push Gateway')
+        'body': json.dumps('Cost data retrieved and pushed to CloudWatch Metrics')
     }
 
-def transform_data(data):
+def publish_to_cloudwatch(cost_percentage):
+    cloudwatch = boto3.client('cloudwatch')
 
-    transformed_data = []
-    for result in data['ResultsByTime']:
-        transformed_data.append({
-            'time': result['TimePeriod']['Start'],
-            'cost': result['Total']['BlendedCost']['Amount']
-        })
-    return transformed_data
-
-def push_to_gateway(data):
-    job_name = 'pushJob'  # Specify the job name for the metrics
-
-    # Create a list to store the metrics
-    metrics = []
-
-    # Iterate over the transformed data and create Prometheus metrics
-    for item in data:
-        time = item['time']
-        cost = item['cost']
-
-        # Create a Gauge metric for the cost data
-        metric = Gauge('blended_cost', 'Blended cost', ['time'])
-        metric.labels(time).set(cost)
-
-        # Add the metric to the list
-        metrics.append(metric)
-
-    # Push the metrics to the Push Gateway
-    push_to_gateway('localhost:9091', job=job_name, registry=metrics)
-
-    print("Pushing data to Push Gateway")
-    print(data)
+    # Publish the cost percentage as a custom metric
+    cloudwatch.put_metric_data(
+        Namespace='CustomCostMetric',
+        MetricData=[
+            {
+                'MetricName': 'CostPercentageMetric',
+                'Value': cost_percentage,
+                'Unit': 'Percent'
+            }
+        ]
+    )
