@@ -9,7 +9,7 @@ data "archive_file" "zip" {
 resource "aws_lambda_function" "cost_metric_lambda" {
   function_name    = "${var.namespace}-cost_metric_lambda"
   runtime          = "python3.9"
-  handler          = "lambda_function.handler"
+  handler          = "cost_metric_lambda.handler"
   timeout          = 60
   memory_size      = 128
   role             = aws_iam_role.lambda_role.arn  # IAM role ARN for the Lambda function's permissions
@@ -19,6 +19,8 @@ resource "aws_lambda_function" "cost_metric_lambda" {
   environment {
     variables = {
       MAXIMUM_BUDGET = var.maximum_budget
+      CLOUDWATCH_NAMESPACE = var.cloudwatch_namespace
+      METRIC_NAME = var.metric_name
     }
   }
 }
