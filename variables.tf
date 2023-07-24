@@ -21,3 +21,9 @@ variable "metric_name" {
   description = "Name of the custom metric in CloudWatch"
   default     = "CostPercentageMetric"
 }
+
+variable "slack_channel_url" {
+  description = "Slack Channel URL"
+  type        = string
+  default     = "https://hooks.slack.com/services/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"
+}

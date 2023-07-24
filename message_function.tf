@@ -12,6 +12,12 @@ resource "aws_lambda_function" "lambda_read_send" {
   memory_size      = 128
   role             = aws_iam_role.lambda_read_send_role.arn
   filename         = data.archive_file.lambda_zip.output_path
+
+  environment {
+    variables = {
+      slack_channel_url = var.slack_channel_url
+    }
+  }
 }
 
 # Create an IAM role for the Lambda function
