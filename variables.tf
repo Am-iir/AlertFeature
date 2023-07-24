@@ -25,5 +25,5 @@ variable "metric_name" {
 variable "slack_channel_url" {
   description = "Slack Channel URL"
   type        = string
-  default     = "https://hooks.slack.com/services/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"
+  default     = ""
 }
