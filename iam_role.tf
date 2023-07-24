@@ -1,6 +1,6 @@
 # Define an IAM role for the Lambda function
 resource "aws_iam_role" "lambda_role" {
-  name = "cost-explorer-lambda-role"
+  name = "${var.namespace}-cost-metric-lambda-role"
 
   # Define the trust policy to allow the Lambda service to assume this role
   assume_role_policy = <<EOF
@@ -27,7 +27,7 @@ resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
 
 # Define a custom IAM policy for Cost Explorer and CloudWatch access
 resource "aws_iam_policy" "custom_policy" {
-  name        = "CustomCostExplorerCloudWatchPolicy"  # Name of the custom policy
+  name        = "${var.namespace}-CustomCostExplorerCloudWatchPolicy"  # Name of the custom policy
   description = "Custom policy for Cost Explorer and CloudWatch access"
 
   # Define the policy document allowing ce:GetCostAndUsage, cloudwatch:PutMetricAlarm, and cloudwatch:PutMetricData actions

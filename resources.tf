@@ -1,25 +1,6 @@
-# Create a zip archive of the Lambda function code
-data "archive_file" "zip" {
-  type        = "zip"
-  source_file = "lambda_function.py"
-  output_path = "lambda_function.zip"
-}
-
-# Define an AWS Lambda function resource
-resource "aws_lambda_function" "example" {
-  function_name    = "cost-explorer-lambda"
-  runtime          = "python3.9"
-  handler          = "lambda_function.handler"
-  timeout          = 60
-  memory_size      = 128
-  role             = aws_iam_role.lambda_role.arn  # IAM role ARN for the Lambda function's permissions
-  filename         = data.archive_file.zip.output_path
-}
-
-
 # Create an SNS topic for alarm notifications
 resource "aws_sns_topic" "alarm_topic" {
-  name = "cost-exceeds-threshold-topic"
+  name = "${var.namespace}-cost-exceeds-threshold-topic"
 }
 
 # Subscribe the Lambda function to the SNS topic
@@ -33,11 +14,11 @@ resource "aws_sns_topic_subscription" "lambda_subscription" {
 /*
 */
 resource "aws_cloudwatch_metric_alarm" "cost_percentage_alarm" {
-  alarm_name          = "Cost Percentage Exceeds Threshold 8"
+  alarm_name          = "${var.namespace}-Cost Percentage Exceeds Threshold 8"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 1
-  metric_name         = "CostPercentageMetric"
-  namespace           = "CustomCostMetric"
+  metric_name         = var.metric_name
+  namespace           = var.cloudwatch_namespace
   period              = 86400  # 1 day (in seconds)
   statistic           = "Average"
   threshold           = 8  # Adjust the threshold value as needed
@@ -47,11 +28,11 @@ resource "aws_cloudwatch_metric_alarm" "cost_percentage_alarm" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "cost_percentage_alarm_2" {
-  alarm_name          = "Cost Percentage Exceeds Threshold 50"
+  alarm_name          = "${var.namespace}-Cost Percentage Exceeds Threshold 50"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 1
-  metric_name         = "CostPercentageMetric"
-  namespace           = "CustomCostMetric"
+  metric_name         = var.metric_name
+  namespace           = var.cloudwatch_namespace
   period              = 86400  # 1 day (in seconds)
   statistic           = "Average"
   threshold           = 50  # Adjust the threshold value as needed

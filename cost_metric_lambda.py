@@ -1,9 +1,7 @@
 import boto3
 import datetime
 import json
-
-# Maximum budget set by the user (in dollars)
-maximum_budget = 1.0
+import os
 
 def handler(event, context):
     # Create a Cost Explorer client
@@ -31,6 +29,9 @@ def handler(event, context):
     # Extract the total cost from the response
     total_cost = float(response['ResultsByTime'][0]['Total']['UnblendedCost']['Amount'])
 
+    # Get the maximum budget from environment variables
+    maximum_budget = float(os.environ['MAXIMUM_BUDGET'])
+
     # Calculate the cost percentage based on the maximum budget
     cost_percentage = (total_cost / maximum_budget) * 100
 
@@ -45,12 +46,16 @@ def handler(event, context):
 def publish_to_cloudwatch(cost_percentage):
     cloudwatch = boto3.client('cloudwatch')
 
+    # Get the namespace and metric name from environment variables
+    cloudwatch_namespace = os.environ['CLOUDWATCH_NAMESPACE']
+    metric_name = os.environ['METRIC_NAME']
+
     # Publish the cost percentage as a custom metric
     cloudwatch.put_metric_data(
-        Namespace='CustomCostMetric',
+        Namespace= cloudwatch_namespace,
         MetricData=[
             {
-                'MetricName': 'CostPercentageMetric',
+                'MetricName': metric_name,
                 'Value': cost_percentage,
                 'Unit': 'Percent'
             }
