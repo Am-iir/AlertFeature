@@ -1,16 +1,16 @@
 data "archive_file" "lambda_zip" {
   type        = "zip"
-  source_file = "message_function.py"
-  output_path = "message_function.zip"
+  source_file = "notifier.py"
+  output_path = "notifier.zip"
 }
 
-resource "aws_lambda_function" "lambda_read_send" {
-  function_name    = "lambda_read_send"
+resource "aws_lambda_function" "notifier" {
+  function_name    = "${var.namespace}-notifier"
   runtime          = "python3.9"
-  handler          = "message_function.lambda_handler"
+  handler          = "notifier.lambda_handler"
   timeout          = 60
   memory_size      = 128
-  role             = aws_iam_role.lambda_read_send_role.arn
+  role             = aws_iam_role.notifier_role.arn
   filename         = data.archive_file.lambda_zip.output_path
 
   environment {
@@ -21,8 +21,8 @@ resource "aws_lambda_function" "lambda_read_send" {
 }
 
 # Create an IAM role for the Lambda function
-resource "aws_iam_role" "lambda_read_send_role" {
-  name = "lambda_read_send"
+resource "aws_iam_role" "notifier_role" {
+  name = "${var.namespace}-notifier_role"
 
   # Define the trust policy to allow the Lambda service to assume this role
   assume_role_policy = <<EOF
@@ -43,13 +43,13 @@ EOF
 
 # Attach the necessary policies to the IAM role
 resource "aws_iam_role_policy_attachment" "lambda_basic_execution_attachment" {
-  role       = aws_iam_role.lambda_read_send_role.name
+  role       = aws_iam_role.notifier_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
 # Define a custom IAM policy for Send Email permissions
-resource "aws_iam_policy" "lambda_read_send_custom_policy" {
-  name        = "CombinedLambdaCustomPolicy"
+resource "aws_iam_policy" "notifier_custom_policy" {
+  name        = "${var.namespace}-CombinedLambdaCustomPolicy"
   description = "Custom IAM policy for combined Lambda function"
 
   # Define the policy document allowing the "ses:SendEmail" action
@@ -70,14 +70,14 @@ EOF
 }
 
 # Attach the custom policy to the IAM role
-resource "aws_iam_role_policy_attachment" "lambda_read_send_custom_policy_attachment" {
-  role       = aws_iam_role.lambda_read_send_role.name
-  policy_arn = aws_iam_policy.lambda_read_send_custom_policy.arn
+resource "aws_iam_role_policy_attachment" "notifier_custom_policy_attachment" {
+  role       = aws_iam_role.notifier_role.name
+  policy_arn = aws_iam_policy.notifier_custom_policy.arn
 }
 
 # Attach the Amazon SES policy to the IAM role
 resource "aws_iam_role_policy_attachment" "lambda_ses_policy_attachment" {
-  role       = aws_iam_role.lambda_read_send_role.name
+  role       = aws_iam_role.notifier_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSESFullAccess"
 }
 
@@ -85,7 +85,7 @@ resource "aws_iam_role_policy_attachment" "lambda_ses_policy_attachment" {
 resource "aws_lambda_permission" "lambda_sns_trigger_permission" {
   statement_id  = "AllowExecutionFromSNS"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.lambda_read_send.function_name
+  function_name = aws_lambda_function.notifier.function_name
   principal     = "sns.amazonaws.com"
   source_arn    = aws_sns_topic.alarm_topic.arn
 }

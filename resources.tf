@@ -7,7 +7,7 @@ resource "aws_sns_topic" "alarm_topic" {
 resource "aws_sns_topic_subscription" "lambda_subscription" {
   topic_arn = aws_sns_topic.alarm_topic.arn
   protocol  = "lambda"
-  endpoint  = aws_lambda_function.lambda_read_send.arn
+  endpoint  = aws_lambda_function.notifier.arn
 }
 
 # Create a CloudWatch metric alarm to trigger the SNS topic
