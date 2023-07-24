@@ -21,21 +21,7 @@ resource "aws_cloudwatch_metric_alarm" "cost_percentage_alarm" {
   namespace           = var.cloudwatch_namespace
   period              = 86400  # 1 day (in seconds)
   statistic           = "Average"
-  threshold           = 8  # Adjust the threshold value as needed
-  alarm_description   = "The cost percentage has exceeded the threshold"
-  alarm_actions       = [aws_sns_topic.alarm_topic.arn]
-
-}
-
-resource "aws_cloudwatch_metric_alarm" "cost_percentage_alarm_2" {
-  alarm_name          = "${var.namespace}-Cost Percentage Exceeds Threshold 50"
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = 1
-  metric_name         = var.metric_name
-  namespace           = var.cloudwatch_namespace
-  period              = 86400  # 1 day (in seconds)
-  statistic           = "Average"
-  threshold           = 50  # Adjust the threshold value as needed
+  threshold           = var.threshold # Adjust the threshold value as needed
   alarm_description   = "The cost percentage has exceeded the threshold"
   alarm_actions       = [aws_sns_topic.alarm_topic.arn]
 

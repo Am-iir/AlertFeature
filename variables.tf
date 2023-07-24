@@ -10,6 +10,12 @@ variable "maximum_budget" {
   default     = 1.0  # You can change the default value as needed
 }
 
+variable "threshold" {
+  description = "The threshold for the cost percentage (in percent)"
+  type        = number
+  default     = 10  # Set as 10 for test purpose
+}
+
 variable "cloudwatch_namespace" {
   type        = string
   description = "Namespace for the CloudWatch metric"
