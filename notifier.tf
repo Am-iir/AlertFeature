@@ -15,6 +15,9 @@ resource "aws_lambda_function" "notifier" {
 
   environment {
     variables = {
+      sender_email = var.sender_email
+      recipient_email = var.recipient_email
+      aws_region = var.aws_region
       slack_channel_url = var.slack_channel_url
     }
   }

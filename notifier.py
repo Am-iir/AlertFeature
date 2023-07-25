@@ -21,9 +21,9 @@ def lambda_handler(event, context):
     }
 
 def send_email():
-    SENDER = "104088013@student.swin.edu.au"
-    RECIPIENT = "maharjanamir.101@gmail.com"
-    AWS_REGION = "eu-west-1"
+    SENDER = os.environ["sender_email"]
+    RECIPIENT = os.environ["recipient_email"]
+    AWS_REGION = os.environ["aws_region"]
     SUBJECT = "Cost Usage Reminder"
     BODY_TEXT = "Alarm Triggered"
     BODY_HTML = f"<html><body><h1>Cost Usage Reminder</h1><pre>Hello this is a reminder to notify you that your account has just crossed 50% threshold.</pre></body></html>"

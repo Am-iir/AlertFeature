@@ -28,6 +28,24 @@ variable "metric_name" {
   default     = "CostPercentageMetric"
 }
 
+variable "sender_email" {
+  description = "Sender Email Address"
+  type        = string
+  default     = "104088013@student.swin.edu.au"
+}
+
+variable "recipient_email" {
+  description = "Recipient Email Address"
+  type        = string
+  default     = "maharjanamir.101@gmail.com"
+}
+
+variable "aws_region" {
+  description = "Aws Region"
+  type        = string
+  default     = "ap-southeast-2"
+}
+
 variable "slack_channel_url" {
   description = "Slack Channel URL"
   type        = string
