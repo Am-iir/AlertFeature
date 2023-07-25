@@ -25,6 +25,24 @@ resource "aws_lambda_function" "cost_metric_lambda" {
   }
 }
 
+resource "aws_cloudwatch_event_rule" "lambda_schedule" {
+  name                = "LambdaScheduleRule"
+  description         = "Schedule Lambda to run every day"
+  schedule_expression = "cron(0 0 * * ? *)"  # Run at 00:00 UTC every day
+}
+
+resource "aws_cloudwatch_event_target" "lambda_target" {
+  rule      = aws_cloudwatch_event_rule.lambda_schedule.name
+  arn       = aws_lambda_function.cost_metric_lambda.arn
+}
+
+resource "aws_lambda_permission" "allow_cloudwatch" {
+  statement_id  = "AllowExecutionFromCloudWatch"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.cost_metric_lambda.function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.lambda_schedule.arn
+}
 
 
 
