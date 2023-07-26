@@ -40,7 +40,7 @@ variable "recipient_email" {
   default     = "maharjanamir.101@gmail.com"
 }
 
-variable "aws_region" {
+variable "region" {
   description = "Aws Region"
   type        = string
   default     = "ap-southeast-2"

@@ -4,6 +4,7 @@ from botocore.exceptions import ClientError
 import urllib3
 import os
 
+
 def lambda_handler(event, context):
     email_status = send_email()
     slack_status = send_slack()
@@ -20,10 +21,11 @@ def lambda_handler(event, context):
         'body': json.dumps(response_msg)
     }
 
+
 def send_email():
     SENDER = os.environ["sender_email"]
     RECIPIENT = os.environ["recipient_email"]
-    AWS_REGION = os.environ["aws_region"]
+    AWS_REGION = os.environ["region"]
     SUBJECT = "Cost Usage Reminder"
     BODY_TEXT = "Alarm Triggered"
     BODY_HTML = f"<html><body><h1>Cost Usage Reminder</h1><pre>Hello this is a reminder to notify you that your account has just crossed 50% threshold.</pre></body></html>"
@@ -59,6 +61,7 @@ def send_email():
     except ClientError as e:
         print("Failed to send email:", e.response['Error']['Message'])
         return False
+
 
 def send_slack():
     http = urllib3.PoolManager()
