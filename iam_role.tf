@@ -3,20 +3,18 @@ resource "aws_iam_role" "lambda_role" {
   name = "${var.namespace}-cost-metric-lambda-role"
 
   # Define the trust policy to allow the Lambda service to assume this role
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "lambda.amazonaws.com"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+        Action = "sts:AssumeRole"
       },
-      "Action": "sts:AssumeRole"
-    }
-  ]
-}
-EOF
+    ]
+  })
 }
 
 # Attach the AWS Lambda basic execution role policy to the IAM role
@@ -31,26 +29,54 @@ resource "aws_iam_policy" "custom_policy" {
   description = "Custom policy for Cost Explorer and CloudWatch access"
 
   # Define the policy document allowing ce:GetCostAndUsage, cloudwatch:PutMetricAlarm, and cloudwatch:PutMetricData actions
-  policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-        "ce:GetCostAndUsage",
-        "cloudwatch:PutMetricAlarm",
-        "cloudwatch:PutMetricData"
-      ],
-      "Resource": "*"
-    }
-  ]
-}
-EOF
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ce:GetCostAndUsage",
+          "cloudwatch:PutMetricAlarm",
+          "cloudwatch:PutMetricData"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
 }
 
 # Attach the custom policy to the IAM role
 resource "aws_iam_role_policy_attachment" "cost_explorer_cloudwatch_policy_attachment" {
   role       = aws_iam_role.lambda_role.name
   policy_arn = aws_iam_policy.custom_policy.arn
+}
+
+# Define a custom IAM policy for S3 bucket access
+resource "aws_iam_policy" "s3_bucket_access_policy" {
+  name        = "${var.namespace}-S3BucketAccessPolicy"
+  description = "Custom IAM policy for S3 bucket access"
+
+  # Define the policy document allowing read access to the specific S3 bucket
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:ListBucket",
+        ]
+        Resource = [
+          "arn:aws:s3:::alocal2-metadata-storage",
+          "arn:aws:s3:::alocal2-metadata-storage/*",
+        ]
+      },
+    ]
+  })
+}
+
+# Attach the S3 bucket access policy to the IAM role
+resource "aws_iam_role_policy_attachment" "s3_bucket_access_policy_attachment" {
+  role       = aws_iam_role.lambda_role.name
+  policy_arn = aws_iam_policy.s3_bucket_access_policy.arn
 }

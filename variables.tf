@@ -1,7 +1,13 @@
 variable "namespace" {
   type        = string
   description = "The namespace referring to an env"
-  default     = "example"
+  default     = "alocal"
+}
+
+variable "bucket" {
+  description = "S3 bucket where cost report is stored"
+  type        = string
+  default     = "alocal2-metadata-storage"
 }
 
 variable "maximum_budget" {

@@ -18,6 +18,7 @@ resource "aws_lambda_function" "cost_metric_lambda" {
   # Set the environment variable for the Lambda function
   environment {
     variables = {
+      BUCKET = var.bucket
       MAXIMUM_BUDGET = var.maximum_budget
       CLOUDWATCH_NAMESPACE = var.cloudwatch_namespace
       METRIC_NAME = var.metric_name
