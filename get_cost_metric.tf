@@ -22,6 +22,7 @@ resource "aws_lambda_function" "cost_metric_lambda" {
       MAXIMUM_BUDGET = var.maximum_budget
       CLOUDWATCH_NAMESPACE = var.cloudwatch_namespace
       METRIC_NAME = var.metric_name
+      SNS_TOPIC_ARN = aws_sns_topic.alarm_topic.arn
     }
   }
 }

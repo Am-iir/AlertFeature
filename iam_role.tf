@@ -80,3 +80,23 @@ resource "aws_iam_role_policy_attachment" "s3_bucket_access_policy_attachment" {
   role       = aws_iam_role.lambda_role.name
   policy_arn = aws_iam_policy.s3_bucket_access_policy.arn
 }
+
+resource "aws_iam_policy" "sns_publish_policy" {
+  name = "SNSPublishPolicy"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow",
+        Action   = "sns:Publish",
+        Resource = aws_sns_topic.alarm_topic.arn,
+      },
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "sns_publish_policy_attachment" {
+  policy_arn = aws_iam_policy.sns_publish_policy.arn
+  role       = aws_iam_role.lambda_role.name
+}

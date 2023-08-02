@@ -37,6 +37,9 @@ def handler(event, context):
         # Publish the cost percentage as a custom metric to CloudWatch Metrics
         publish_to_cloudwatch(cost_percentage)
 
+        # Publish the alarm to the SNS topic along with the calculated values
+        publish_to_sns(cost_percentage, maximum_budget, total_cost)
+
         return {
             'statusCode': 200,
             'body': json.dumps('Cost data retrieved from S3 and pushed to CloudWatch Metrics')
@@ -75,3 +78,28 @@ def publish_to_cloudwatch(cost_percentage):
             }
         ]
     )
+
+
+def publish_to_sns(cost_percentage, maximum_budget, total_cost):
+    sns_client = boto3.client('sns')
+
+    # Get the ARN of the SNS topic to which the notifier_lambda is subscribed
+    sns_topic_arn = os.environ['SNS_TOPIC_ARN']
+
+    # Create the message to be sent in the SNS notification
+    message = {
+        'cost_percentage': cost_percentage,
+        'maximum_budget': maximum_budget,
+        'total_cost': total_cost
+    }
+
+    try:
+        # Publish the message to the SNS topic
+        sns_client.publish(
+            TopicArn=sns_topic_arn,
+            Message=json.dumps(message)
+        )
+    except ClientError as e:
+        # Handle the SNS publish error here
+        print(f"Failed to publish message to SNS topic: {e}")
+        # You can choose to log the error or take any other necessary actions
