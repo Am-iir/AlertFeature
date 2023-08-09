@@ -82,7 +82,7 @@ resource "aws_iam_role_policy_attachment" "s3_bucket_access_policy_attachment" {
 }
 
 resource "aws_iam_policy" "sns_publish_policy" {
-  name = "SNSPublishPolicy"
+  name = "${var.namespace}-SNSPublishPolicy"
 
   policy = jsonencode({
     Version = "2012-10-17"
