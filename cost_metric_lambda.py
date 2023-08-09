@@ -76,7 +76,7 @@ def handle_total_account():
     # Publish the cost percentage as a custom metric to CloudWatch Metrics
 
     publish_to_cloudwatch(os.environ['METRIC_NAME'], cost_percentage)
-    publish_to_sns(cost_percentage, maximum_budget, total_cost)
+    # publish_to_sns(cost_percentage, maximum_budget, total_cost)
 
 
 def handle_resource_cost():
