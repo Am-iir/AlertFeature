@@ -6,3 +6,4 @@ Continuous monitoring is enabled by CloudWatch, which observes the cost metric. 
 
 The Notifier Lambda is a key component responsible for processing and transforming the JSON data into formatted notifications. These notifications are dispatched via two crucial communication channels: Email and Slack. Before dispatching emails, it is handled with help of SES. Then the end users will be able to view their cost notifications.
 
+<img width="440" alt="image" src="https://github.com/Am-iir/AlertFeature/assets/42893222/42eace7f-2e38-41ba-aab5-d9a0251eceff">
